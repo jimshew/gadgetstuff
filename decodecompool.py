@@ -22,11 +22,19 @@ def find_sync_byte(ser, timeout):
         if elapsed_time >= timeout:
             return None
 
-def decode_packet(packet_bytes):
+def find_OpCode(ser, timeout):
+    controller_broadcast = bytearray([0x0F, 0x1B, 0x02])
+    buffer = ser.read(3)
+    if buffer[:3] == controller_broadcast:
+        decode_broadcast(ser.read(19))
+    else:
+        print("No Opcode 0x02 match")
+
+def decode_broadcast(packet_bytes):
+    #field_labels = [
+    #    "Destination Address",
+    #    "Version",
     field_labels = [
-        "Destination Address",
-        "Source Address",
-        "OpCode",
         "Info Field Length",
         "Minutes",
         "Hours",
@@ -52,6 +60,8 @@ def decode_packet(packet_bytes):
         readable = byte
         if label.find('Temp') != -1:
             readable = float(byte)*0.25*9.0/5.0+32.0
+        if label.find('Version') != -1:
+            readable = float(byte)*0.1
         print(f"Byte: 0x{byte:02X}, {label}: {readable}")
 
 
@@ -77,9 +87,9 @@ try:
         if sync_data:
             print("Synchronization byte found:", sync_data.hex())
             
-            remaining_bytes = ser.read(27)
-            print("Remaining bytes:", remaining_bytes.hex())
-            decode_packet(remaining_bytes)
+       #     remaining_bytes = ser.read(27)
+       #     print("Remaining bytes:", remaining_bytes.hex())
+            find_OpCode(ser,timeout)
             
             # Reset the buffer for the next iteration
             buffer = bytearray()
