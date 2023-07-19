@@ -32,17 +32,27 @@ def decode_packet(packet_bytes):
         "Hours",
         "Primary Equipment",
         "Secondary Equipment",
-        "Heat Source",
-        "Desired Pool Temp",
-        "Desired Spa Temp",
-        "Switch State",
-        "Byte Use Enable",
+        "Delay/Heat Source",
+        "Water Temp",
+        "Solar Temp",
+	"Spa Water Temp",
+	"Spa Solar Temp",
+	"Desired Pool Temp",
+	"Desired Spa Temp",
+	"Air Temp",
+	"UNK 1",
+	"UNK 2",
+        "Equip Status",
+        "Product Type",
         "Hi Byte of Checksum",
         "Lo Byte of Checksum"
     ]
 
     for byte, label in zip(packet_bytes, field_labels):
-        print(f"Byte: 0x{byte:02X}, {label}: {byte}")
+        readable = byte
+        if label.find('Temp') != -1:
+            readable = float(byte)*0.25*9.0/5.0+32.0
+        print(f"Byte: 0x{byte:02X}, {label}: {readable}")
 
 
 # Open the serial port
